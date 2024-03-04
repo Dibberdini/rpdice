@@ -90,19 +90,37 @@ class RPDice
             }
             averageRoll += dice.modifier;
             int clampedChance = 0;
+            double chanceToHit = 0;
+            //Take advantage into account. There is no 0% or 100% because of nat 20's and 1's.
             if (adv == 1)
             {
-                double chanceToHit = 1 - Math.Pow((ac - averageRoll - 1), 2) / 400;
+                //Formula for advantage-rolls only works if the bonus(+1) is not equal to or greater than target AC.
+                if (averageRoll + 1 < ac)
+                {
+                    chanceToHit = 1 - (Math.Pow((ac - averageRoll - 1), 2) / 400);
+                }
+                else
+                {
+                    chanceToHit = 100;
+                }
                 clampedChance = Clamp((int)Math.Round(chanceToHit * 100), 10, 99);
             }
             else if (adv == -1)
             {
-                double chanceToHit = Math.Pow((21 + averageRoll - ac), 2) / 400;
+                //Formula for disadvantage-rolls breaks down if there is a large enough negative bonus.
+                if (21 + averageRoll - ac > 0)
+                {
+                    chanceToHit = Math.Pow((21 + averageRoll - ac), 2) / 400;
+                }
+                else
+                {
+                    chanceToHit = 0;
+                }
                 clampedChance = Clamp((int)Math.Round(chanceToHit * 100), 1, 90);
             }
             else
             {
-                double chanceToHit = (21 + averageRoll - ac) / 20;
+                chanceToHit = (21 + averageRoll - ac) / 20;
                 clampedChance = Clamp((int)Math.Round(chanceToHit * 100), 5, 95);
             }
             Console.WriteLine(clampedChance + "%");
